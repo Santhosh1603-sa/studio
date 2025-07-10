@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { categorizeArticle, type CategorizeArticleOutput } from '@/ai/flows/categorize-article';
+import { extractArticleFromUrl } from '@/ai/flows/extract-article-from-url';
 import { useToast } from '@/hooks/use-toast';
 import { CategorizationForm } from '@/components/categorization-form';
 import { CategorizationResult } from '@/components/categorization-result';
@@ -13,12 +14,37 @@ export function NewsWiseClient() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const { toast } = useToast();
 
-  const handleCategorize = async (content: string) => {
+  const handleCategorize = async (data: {inputType: 'text' | 'url', value: string}) => {
     setIsLoading(true);
     setResult(null);
 
     try {
-      const output = await categorizeArticle({ content });
+      let contentToCategorize = '';
+      let originalContent = data.value;
+
+      if (data.inputType === 'url') {
+        try {
+            const extractionResult = await extractArticleFromUrl({ url: data.value });
+            contentToCategorize = extractionResult.content;
+            if (!contentToCategorize) {
+                throw new Error("Content extraction failed.");
+            }
+        } catch (error) {
+            console.error(error);
+            toast({
+                title: 'Failed to fetch article.',
+                description: 'Could not extract content from the provided URL. Please check the URL or paste the text directly.',
+                variant: 'destructive',
+            });
+            setIsLoading(false);
+            return;
+        }
+      } else {
+        contentToCategorize = data.value;
+      }
+      
+      const output = await categorizeArticle({ content: contentToCategorize });
+      
       if (output.categoryLabels.length === 0) {
         toast({
           title: "Categorization Complete",
@@ -29,7 +55,7 @@ export function NewsWiseClient() {
       setResult(output);
       setHistory(prev => [
         {
-          content,
+          content: originalContent,
           ...output,
           date: new Date().toISOString(),
         },

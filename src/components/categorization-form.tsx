@@ -13,16 +13,26 @@ import { Loader2, FileText, Link } from 'lucide-react';
 
 const formSchema = z.object({
   inputType: z.enum(['text', 'url']),
-  content: z.string().min(50, {
-    message: 'Article text must be at least 50 characters.',
-  }),
-  url: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
+  content: z.string().optional(),
+  url: z.string().optional(),
+}).refine(data => {
+    if (data.inputType === 'text') {
+        return data.content && data.content.length >= 50;
+    }
+    if (data.inputType === 'url') {
+        return data.url && z.string().url().safeParse(data.url).success;
+    }
+    return false;
+}, {
+    message: "Please provide a valid input.",
+    path: ['content'], // you can adjust the path to point to a more general location if needed
 });
+
 
 type FormValues = z.infer<typeof formSchema>;
 
 interface CategorizationFormProps {
-  onSubmit: (content: string) => void;
+  onSubmit: (data: {inputType: 'text' | 'url', value: string}) => void;
   isLoading: boolean;
 }
 
@@ -38,18 +48,19 @@ export function CategorizationForm({ onSubmit, isLoading }: CategorizationFormPr
 
   const handleSubmit = (values: FormValues) => {
     if (values.inputType === 'text' && values.content) {
-      onSubmit(values.content);
-    } else {
-      // This is a placeholder for URL fetching logic
-      form.setError("url", { type: "manual", message: "URL submission is not yet implemented." });
+      onSubmit({inputType: 'text', value: values.content});
+    } else if (values.inputType === 'url' && values.url) {
+      onSubmit({inputType: 'url', value: values.url});
     }
   };
+
+  const inputType = form.watch('inputType');
 
   return (
     <Card className="shadow-lg">
       <CardHeader>
         <CardTitle>Submit an Article</CardTitle>
-        <CardDescription>Paste article text below to categorize it using our AI model.</CardDescription>
+        <CardDescription>Paste article text or provide a URL to categorize it using our AI model.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -57,7 +68,7 @@ export function CategorizationForm({ onSubmit, isLoading }: CategorizationFormPr
             <Tabs defaultValue="text" className="w-full" onValueChange={(value) => form.setValue('inputType', value as 'text' | 'url')}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="text"><FileText className="w-4 h-4 mr-2" />Paste Text</TabsTrigger>
-                <TabsTrigger value="url" disabled><Link className="w-4 h-4 mr-2" />From URL (Coming Soon)</TabsTrigger>
+                <TabsTrigger value="url"><Link className="w-4 h-4 mr-2" />From URL</TabsTrigger>
               </TabsList>
               <TabsContent value="text">
                 <FormField
@@ -68,7 +79,7 @@ export function CategorizationForm({ onSubmit, isLoading }: CategorizationFormPr
                       <FormLabel className="sr-only">Article Content</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Paste your news article content here..."
+                          placeholder="Paste your news article content here... (min. 50 characters)"
                           className="min-h-[200px] mt-4"
                           {...field}
                         />
@@ -86,7 +97,7 @@ export function CategorizationForm({ onSubmit, isLoading }: CategorizationFormPr
                     <FormItem>
                       <FormLabel className="sr-only">Article URL</FormLabel>
                       <FormControl>
-                          <Input placeholder="https://example.com/news-article" {...field} className="mt-4" disabled/>
+                          <Input placeholder="https://example.com/news-article" {...field} className="mt-4" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -99,7 +110,7 @@ export function CategorizationForm({ onSubmit, isLoading }: CategorizationFormPr
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Categorizing...
+                  {inputType === 'url' ? 'Fetching & Categorizing...' : 'Categorizing...'}
                 </>
               ) : (
                 'Categorize Article'
