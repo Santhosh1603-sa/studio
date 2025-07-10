@@ -112,7 +112,7 @@ export function CategorizationResult({ result, isLoading }: CategorizationResult
             <EntitySection icon={Users} title="Authors" items={result.authors} />
 
             <div>
-              <h3 className="text-lg font-semibold mb-2 flex items-center"><Tag className="w-5 h-5 mr-2 text-accent" />Topic Modeling</h3>
+              <h3 className="text-lg font-semibold mb-2 flex items-center"><Tag className="w-5 h-5 mr-2 text-accent" />Topic Modeling / Categories</h3>
               <div className="space-y-3">
                 {result.topics.labels.length > 0 ? (
                   result.topics.labels.map((label, index) => (
