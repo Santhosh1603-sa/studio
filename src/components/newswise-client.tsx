@@ -8,7 +8,8 @@ import { CategorizationForm } from '@/components/categorization-form';
 import { CategorizationResult } from '@/components/categorization-result';
 import { ArticleHistory, type HistoryItem } from '@/components/article-history';
 
-type ResultState = (AnalyzeArticleOutput & { imageUrl?: string; }) | null;
+type ResultState = (AnalyzeArticleOutput & { imageUrl?: string; url?: string }) | null;
+
 
 export function NewsWiseClient() {
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +59,7 @@ export function NewsWiseClient() {
       
       const output = await analyzeArticle({ content: contentToAnalyze });
       
-      const fullResult = { ...output, imageUrl };
+      const fullResult: ResultState = { ...output, imageUrl, url: data.inputType === 'url' ? data.value : undefined };
       setResult(fullResult);
       
       setHistory(prev => [
@@ -75,8 +76,8 @@ export function NewsWiseClient() {
             isSafeForWork: false,
             summary: '', authors: [],
             sentiment: { label: 'Neutral', score: 0 },
-            politicalView: { bias: 'Unknown', confidence: 0 },
-            categories: { labels: [], scores: [] },
+            politicalView: { bias: 'Unknown', confidence: 0, explanation: '' },
+            topics: { labels: [], scores: [] },
             timeline: [],
             entities: { people: [], organizations: [], locations: [] }
         });
@@ -94,14 +95,18 @@ export function NewsWiseClient() {
   };
 
   const handleHistorySelect = (item: HistoryItem) => {
-    const { originalContent, url, ...resultData } = item;
+    // We need to find the corresponding image URL from the `result` state, as it's not persisted in history.
+    // This is a simplification; in a real app, you'd persist the image URL with the history item.
     let imageUrl: string | undefined;
-    // This is a simplification; in a real app, you'd persist the image URL with the history item
-    if (url) {
-        const matchingResult = result?.url === url ? result : null;
-        if(matchingResult) imageUrl = matchingResult.imageUrl
+    const pastResult = history.find(h => h.id === item.id);
+    if (pastResult?.url) {
+      const matchingResultInState = result?.url === pastResult.url ? result : null;
+      if (matchingResultInState) {
+        imageUrl = matchingResultInState.imageUrl;
+      }
     }
-    setResult({ ...resultData });
+
+    setResult({ ...item, imageUrl, url: item.url });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

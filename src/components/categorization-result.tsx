@@ -7,7 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Tag, Users, Building, MapPin, Calendar, FileText, Smile, Meh, Frown, Landmark, Scale, ShieldAlert } from 'lucide-react';
+import { Tag, Users, Building, MapPin, Calendar, FileText, Smile, Meh, Frown, Landmark, Scale, ShieldAlert, Quote } from 'lucide-react';
 
 interface CategorizationResultProps {
   result: AnalyzeArticleOutput & { imageUrl?: string } | null;
@@ -101,25 +101,32 @@ export function CategorizationResult({ result, isLoading }: CategorizationResult
                     </CardContent>
                 </Card>
             </div>
+
+            {result.politicalView.explanation && (
+                <div className="p-4 bg-muted/50 rounded-lg">
+                    <h4 className="font-semibold mb-2 flex items-center text-sm"><Quote className="w-4 h-4 mr-2 text-accent" />Bias Explanation</h4>
+                    <p className="text-sm text-muted-foreground italic">"{result.politicalView.explanation}"</p>
+                </div>
+            )}
             
             <EntitySection icon={Users} title="Authors" items={result.authors} />
 
             <div>
-              <h3 className="text-lg font-semibold mb-2 flex items-center"><Tag className="w-5 h-5 mr-2 text-accent" />Categories</h3>
+              <h3 className="text-lg font-semibold mb-2 flex items-center"><Tag className="w-5 h-5 mr-2 text-accent" />Topic Modeling</h3>
               <div className="space-y-3">
-                {result.categories.labels.length > 0 ? (
-                  result.categories.labels.map((label, index) => (
+                {result.topics.labels.length > 0 ? (
+                  result.topics.labels.map((label, index) => (
                     <div key={index} className="space-y-1.5 animate-in fade-in">
                       <div className="flex items-center justify-between">
                         <p className="font-medium">{label}</p>
                         <p className="text-sm text-muted-foreground">
-                          {(result.categories.scores[index] * 100).toFixed(0)}%
+                          {(result.topics.scores[index] * 100).toFixed(0)}%
                         </p>
                       </div>
-                      <Progress value={result.categories.scores[index] * 100} className="[&>div]:bg-accent" />
+                      <Progress value={result.topics.scores[index] * 100} className="[&>div]:bg-accent" />
                     </div>
                   ))
-                ) : <p className="text-sm text-muted-foreground">No categories identified.</p>}
+                ) : <p className="text-sm text-muted-foreground">No topics identified.</p>}
               </div>
             </div>
 

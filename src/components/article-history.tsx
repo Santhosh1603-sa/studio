@@ -54,7 +54,7 @@ export function ArticleHistory({ history, onSelect }: ArticleHistoryProps) {
                 <TableHeader>
                     <TableRow>
                     <TableHead>Article</TableHead>
-                    <TableHead>Categories</TableHead>
+                    <TableHead>Topics</TableHead>
                     <TableHead className="text-right">Date</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -70,15 +70,15 @@ export function ArticleHistory({ history, onSelect }: ArticleHistoryProps) {
                             </TableCell>
                             <TableCell>
                                 <div className="flex flex-wrap gap-1">
-                                {item.categories.labels.length > 0 ? (
-                                    item.categories.labels.slice(0, 2).map((label, i) => (
+                                {item.topics.labels.length > 0 ? (
+                                    item.topics.labels.slice(0, 2).map((label, i) => (
                                     <Badge key={i} variant="secondary">{label}</Badge>
                                     ))
                                 ) : (
                                     <span className="text-xs text-muted-foreground">None</span>
                                 )}
-                                {item.categories.labels.length > 2 && (
-                                    <Badge variant="outline">+{item.categories.labels.length - 2}</Badge>
+                                {item.topics.labels.length > 2 && (
+                                    <Badge variant="outline">+{item.topics.labels.length - 2}</Badge>
                                 )}
                                 </div>
                             </TableCell>

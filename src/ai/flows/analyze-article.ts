@@ -29,14 +29,15 @@ const AnalyzeArticleOutputSchema = z.object({
   politicalView: z.object({
     bias: z.enum(['Left-leaning', 'Center', 'Right-leaning', 'Unknown']).describe('The detected political bias of the article.'),
     confidence: z.number().describe('The confidence score (0 to 1) for the political bias detection.'),
+    explanation: z.string().describe('A brief explanation for the detected political bias, citing specific language or framing.'),
   }).describe('The political view analysis.'),
-  categories: z.object({
+  topics: z.object({
     labels: z
       .array(z.string())
-      .describe('The predicted category labels for the article.'),
+      .describe('The predicted topic labels for the article (topic modeling).'),
     scores: z
       .array(z.number())
-      .describe('The confidence scores for each predicted category label.'),
+      .describe('The confidence scores for each predicted topic label.'),
   }),
   timeline: z
     .array(
@@ -83,8 +84,8 @@ You must extract the following information:
 2.  **Summary**: Write a concise, neutral summary of the article's main points.
 3.  **Authors**: Identify the authors of the article. If not mentioned, return an empty array.
 4.  **Sentiment**: Analyze the overall sentiment. Provide a label ('Positive', 'Negative', 'Neutral') and a score from -1 to 1.
-5.  **Political View**: Analyze the political leaning. Provide a bias label ('Left-leaning', 'Center', 'Right-leaning', 'Unknown') and a confidence score.
-6.  **Categories**: Categorize the article. Provide labels and confidence scores.
+5.  **Political View**: Analyze the political leaning. Provide a bias label ('Left-leaning', 'Center', 'Right-leaning', 'Unknown'), a confidence score, and a brief explanation for your determination, highlighting specific wording or framing if possible.
+6.  **Topic Modeling**: Categorize the article into general topics. Provide topic labels and confidence scores.
 7.  **Timeline**: List key events chronologically with dates.
 8.  **Entities**: Extract key people, organizations, and locations.
 
