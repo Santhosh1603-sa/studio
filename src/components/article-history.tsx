@@ -5,19 +5,21 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { History } from 'lucide-react';
+import { History, ShieldAlert } from 'lucide-react';
 
 export interface HistoryItem extends AnalyzeArticleOutput {
   id: string;
-  originalContent: string;
+  url?: string;
+  originalContent?: string;
   date: string;
 }
 
 interface ArticleHistoryProps {
   history: HistoryItem[];
+  onSelect: (item: HistoryItem) => void;
 }
 
-export function ArticleHistory({ history }: ArticleHistoryProps) {
+export function ArticleHistory({ history, onSelect }: ArticleHistoryProps) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -26,6 +28,17 @@ export function ArticleHistory({ history }: ArticleHistoryProps) {
     });
   };
 
+  const getArticleTitle = (item: HistoryItem) => {
+    if (item.url) {
+        try {
+            return new URL(item.url).hostname;
+        } catch {
+            return item.url.substring(0, 40) + '...';
+        }
+    }
+    return (item.originalContent || '').substring(0, 40) + '...';
+  }
+
   return (
     <Card className="shadow-lg h-full">
       <CardHeader>
@@ -33,7 +46,7 @@ export function ArticleHistory({ history }: ArticleHistoryProps) {
             <History className="w-6 h-6 mr-2" />
             Analysis History
         </CardTitle>
-        <CardDescription>Review your previously analyzed articles.</CardDescription>
+        <CardDescription>Review your previously analyzed articles. Click to view details.</CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[520px] w-full border rounded-md">
@@ -48,9 +61,12 @@ export function ArticleHistory({ history }: ArticleHistoryProps) {
                 <TableBody>
                     {history.length > 0 ? (
                     history.map((item) => (
-                        <TableRow key={item.id}>
-                            <TableCell className="font-medium text-sm text-muted-foreground">
-                                {item.originalContent.substring(0, 40)}...
+                        <TableRow key={item.id} onClick={() => onSelect(item)} className="cursor-pointer">
+                            <TableCell className="font-medium text-sm">
+                                <div className="flex items-center gap-2">
+                                    {!item.isSafeForWork && <ShieldAlert className="w-4 h-4 text-destructive shrink-0" />}
+                                    <span className="truncate text-muted-foreground">{getArticleTitle(item)}</span>
+                                </div>
                             </TableCell>
                             <TableCell>
                                 <div className="flex flex-wrap gap-1">

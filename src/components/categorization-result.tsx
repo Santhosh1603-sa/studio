@@ -1,20 +1,27 @@
 'use client';
 
+import Image from 'next/image';
 import { type AnalyzeArticleOutput } from '@/ai/flows/analyze-article';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Tag, Users, Building, MapPin, Calendar, FileText } from 'lucide-react';
+import { Tag, Users, Building, MapPin, Calendar, FileText, Smile, Meh, Frown, Landmark, Scale, ShieldAlert } from 'lucide-react';
 
 interface CategorizationResultProps {
-  result: AnalyzeArticleOutput | null;
+  result: AnalyzeArticleOutput & { imageUrl?: string } | null;
   isLoading: boolean;
 }
 
 const LoadingState = () => (
   <div className="space-y-6 p-4">
+    <Skeleton className="h-48 w-full rounded-lg" />
+    <div className="space-y-3">
+        <Skeleton className="h-6 w-1/2" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-3/4" />
+    </div>
     <div className="space-y-3">
       {[...Array(3)].map((_, i) => (
         <div key={i} className="space-y-2">
@@ -26,30 +33,77 @@ const LoadingState = () => (
         </div>
       ))}
     </div>
-    <Skeleton className="h-8 w-1/3" />
-    <Skeleton className="h-20 w-full" />
-    <Skeleton className="h-8 w-1/3" />
-    <Skeleton className="h-16 w-full" />
   </div>
 );
 
 const EmptyState = () => (
-  <div className="text-center py-10">
-    <p className="text-muted-foreground">Analysis results will appear here once an article is submitted.</p>
+  <div className="text-center py-20">
+    <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
+    <p className="mt-4 text-muted-foreground">Analysis results will appear here once an article is submitted.</p>
   </div>
 );
 
+const NotSFWState = () => (
+    <div className="text-center py-20 flex flex-col items-center">
+      <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
+      <h3 className="mt-4 text-lg font-semibold">Content Not Suitable for All Audiences</h3>
+      <p className="mt-2 text-muted-foreground">The analysis was halted because the article content may be inappropriate (18+).</p>
+    </div>
+  );
 
 export function CategorizationResult({ result, isLoading }: CategorizationResultProps) {
+  const getSentimentIcon = (label: 'Positive' | 'Negative' | 'Neutral') => {
+    switch(label) {
+        case 'Positive': return <Smile className="w-5 h-5 mr-2 text-green-500" />;
+        case 'Negative': return <Frown className="w-5 h-5 mr-2 text-red-500" />;
+        default: return <Meh className="w-5 h-5 mr-2 text-yellow-500" />;
+    }
+  }
+
+  const getPoliticalIcon = () => {
+    return <Scale className="w-5 h-5 mr-2 text-accent" />;
+  }
+  
   return (
-    <Card>
+    <Card className="shadow-lg">
       <CardHeader>
         <CardTitle>Analysis Results</CardTitle>
         <CardDescription>A detailed breakdown of the submitted article.</CardDescription>
       </CardHeader>
-      <CardContent className="min-h-[300px]">
-        {isLoading ? <LoadingState /> : !result ? <EmptyState /> : (
+      <CardContent className="min-h-[500px]">
+        {isLoading ? <LoadingState /> : !result ? <EmptyState /> : !result.isSafeForWork ? <NotSFWState /> : (
           <div className="space-y-6">
+            {result.imageUrl && (
+              <div className="relative aspect-video w-full rounded-lg overflow-hidden">
+                <Image src={result.imageUrl} alt="Article Image" layout="fill" objectFit="cover" data-ai-hint="news article" />
+              </div>
+            )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                    <CardHeader className="flex flex-row items-center space-y-0 pb-2">
+                        {getSentimentIcon(result.sentiment.label)}
+                        <CardTitle className="text-sm font-medium">Sentiment</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-2xl font-bold">{result.sentiment.label}</p>
+                        <p className="text-xs text-muted-foreground">Score: {result.sentiment.score.toFixed(2)}</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center space-y-0 pb-2">
+                        {getPoliticalIcon()}
+                        <CardTitle className="text-sm font-medium">Political View</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-2xl font-bold">{result.politicalView.bias}</p>
+                        <p className="text-xs text-muted-foreground">Confidence: {(result.politicalView.confidence * 100).toFixed(0)}%</p>
+                    </CardContent>
+                </Card>
+            </div>
+            
+            <EntitySection icon={Users} title="Authors" items={result.authors} />
+
             <div>
               <h3 className="text-lg font-semibold mb-2 flex items-center"><Tag className="w-5 h-5 mr-2 text-accent" />Categories</h3>
               <div className="space-y-3">
@@ -69,7 +123,7 @@ export function CategorizationResult({ result, isLoading }: CategorizationResult
               </div>
             </div>
 
-            <Accordion type="multiple" defaultValue={['summary', 'timeline', 'entities']} className="w-full">
+            <Accordion type="multiple" defaultValue={['summary']} className="w-full">
               <AccordionItem value="summary">
                 <AccordionTrigger className="text-lg font-semibold"><FileText className="w-5 h-5 mr-2 text-accent" />Summary</AccordionTrigger>
                 <AccordionContent className="text-muted-foreground pt-2 text-base leading-relaxed">
@@ -96,7 +150,7 @@ export function CategorizationResult({ result, isLoading }: CategorizationResult
               </AccordionItem>
 
               <AccordionItem value="entities">
-                <AccordionTrigger className="text-lg font-semibold"><Users className="w-5 h-5 mr-2 text-accent" />Entities</AccordionTrigger>
+                <AccordionTrigger className="text-lg font-semibold"><Landmark className="w-5 h-5 mr-2 text-accent" />Entities</AccordionTrigger>
                 <AccordionContent className="pt-2 space-y-4">
                   <EntitySection icon={Users} title="People" items={result.entities.people} />
                   <EntitySection icon={Building} title="Organizations" items={result.entities.organizations} />
