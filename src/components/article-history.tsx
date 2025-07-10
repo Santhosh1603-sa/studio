@@ -1,14 +1,15 @@
 'use client';
 
-import { type CategorizeArticleOutput } from '@/ai/flows/categorize-article';
+import { type AnalyzeArticleOutput } from '@/ai/flows/analyze-article';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { History } from 'lucide-react';
 
-export interface HistoryItem extends CategorizeArticleOutput {
-  content: string;
+export interface HistoryItem extends AnalyzeArticleOutput {
+  id: string;
+  originalContent: string;
   date: string;
 }
 
@@ -30,9 +31,9 @@ export function ArticleHistory({ history }: ArticleHistoryProps) {
       <CardHeader>
         <CardTitle className="flex items-center">
             <History className="w-6 h-6 mr-2" />
-            Article History
+            Analysis History
         </CardTitle>
-        <CardDescription>Review your previously categorized articles.</CardDescription>
+        <CardDescription>Review your previously analyzed articles.</CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[520px] w-full border rounded-md">
@@ -46,22 +47,22 @@ export function ArticleHistory({ history }: ArticleHistoryProps) {
                 </TableHeader>
                 <TableBody>
                     {history.length > 0 ? (
-                    history.map((item, index) => (
-                        <TableRow key={index}>
+                    history.map((item) => (
+                        <TableRow key={item.id}>
                             <TableCell className="font-medium text-sm text-muted-foreground">
-                                {item.content.substring(0, 40)}...
+                                {item.originalContent.substring(0, 40)}...
                             </TableCell>
                             <TableCell>
                                 <div className="flex flex-wrap gap-1">
-                                {item.categoryLabels.length > 0 ? (
-                                    item.categoryLabels.slice(0, 2).map((label, i) => (
+                                {item.categories.labels.length > 0 ? (
+                                    item.categories.labels.slice(0, 2).map((label, i) => (
                                     <Badge key={i} variant="secondary">{label}</Badge>
                                     ))
                                 ) : (
                                     <span className="text-xs text-muted-foreground">None</span>
                                 )}
-                                {item.categoryLabels.length > 2 && (
-                                    <Badge variant="outline">+{item.categoryLabels.length - 2}</Badge>
+                                {item.categories.labels.length > 2 && (
+                                    <Badge variant="outline">+{item.categories.labels.length - 2}</Badge>
                                 )}
                                 </div>
                             </TableCell>

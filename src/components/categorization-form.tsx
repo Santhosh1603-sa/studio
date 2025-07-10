@@ -25,7 +25,7 @@ const formSchema = z.object({
     return false;
 }, {
     message: "Please provide a valid input.",
-    path: ['content'], // you can adjust the path to point to a more general location if needed
+    path: ['content'],
 });
 
 
@@ -59,8 +59,8 @@ export function CategorizationForm({ onSubmit, isLoading }: CategorizationFormPr
   return (
     <Card className="shadow-lg">
       <CardHeader>
-        <CardTitle>Submit an Article</CardTitle>
-        <CardDescription>Paste article text or provide a URL to categorize it using our AI model.</CardDescription>
+        <CardTitle>Submit an Article for Analysis</CardTitle>
+        <CardDescription>Paste article text or provide a URL to analyze it with our AI.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -110,10 +110,10 @@ export function CategorizationForm({ onSubmit, isLoading }: CategorizationFormPr
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {inputType === 'url' ? 'Fetching & Categorizing...' : 'Categorizing...'}
+                  {inputType === 'url' ? 'Fetching & Analyzing...' : 'Analyzing...'}
                 </>
               ) : (
-                'Categorize Article'
+                'Analyze Article'
               )}
             </Button>
           </form>
