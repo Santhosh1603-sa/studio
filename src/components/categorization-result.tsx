@@ -75,7 +75,7 @@ export function CategorizationResult({ result, isLoading }: CategorizationResult
           <div className="space-y-6">
             {result.imageUrl && (
               <div className="relative aspect-video w-full rounded-lg overflow-hidden">
-                <Image src={result.imageUrl} alt="Article Image" layout="fill" objectFit="cover" data-ai-hint="news article" />
+                <Image src={result.imageUrl} alt="Article Image" fill style={{objectFit: 'cover'}} data-ai-hint="news article" />
               </div>
             )}
             
