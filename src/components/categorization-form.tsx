@@ -40,7 +40,7 @@ export function CategorizationForm({ onSubmit, isLoading }: CategorizationFormPr
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      inputType: 'text',
+      inputType: 'url',
       content: '',
       url: '',
     },
@@ -60,16 +60,31 @@ export function CategorizationForm({ onSubmit, isLoading }: CategorizationFormPr
     <Card className="shadow-lg">
       <CardHeader>
         <CardTitle>Submit an Article for Analysis</CardTitle>
-        <CardDescription>Paste article text or provide a URL to analyze it with our AI.</CardDescription>
+        <CardDescription>Provide a URL or paste article text to analyze it with our AI.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <Tabs defaultValue="text" className="w-full" onValueChange={(value) => form.setValue('inputType', value as 'text' | 'url')}>
+            <Tabs defaultValue="url" className="w-full" onValueChange={(value) => form.setValue('inputType', value as 'text' | 'url')}>
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="text"><FileText className="w-4 h-4 mr-2" />Paste Text</TabsTrigger>
                 <TabsTrigger value="url"><Link className="w-4 h-4 mr-2" />From URL</TabsTrigger>
+                <TabsTrigger value="text"><FileText className="w-4 h-4 mr-2" />Paste Text</TabsTrigger>
               </TabsList>
+              <TabsContent value="url">
+                <FormField
+                  control={form.control}
+                  name="url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="sr-only">Article URL</FormLabel>
+                      <FormControl>
+                          <Input placeholder="https://example.com/news-article" {...field} className="mt-4" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </TabsContent>
               <TabsContent value="text">
                 <FormField
                   control={form.control}
@@ -83,21 +98,6 @@ export function CategorizationForm({ onSubmit, isLoading }: CategorizationFormPr
                           className="min-h-[200px] mt-4"
                           {...field}
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </TabsContent>
-              <TabsContent value="url">
-                <FormField
-                  control={form.control}
-                  name="url"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="sr-only">Article URL</FormLabel>
-                      <FormControl>
-                          <Input placeholder="https://example.com/news-article" {...field} className="mt-4" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
