@@ -68,14 +68,10 @@ export function NewsWiseClient() {
   };
 
   return (
-    <div className="grid gap-12 lg:grid-cols-[1fr,0.8fr]">
-      <div className="space-y-8">
+    <div className="grid grid-cols-1 gap-8">
         <CategorizationForm onSubmit={handleAnalyze} isLoading={isLoading} />
         <CategorizationResult result={result} isLoading={isLoading} />
-      </div>
-      <div>
         <ArticleHistory history={history} />
-      </div>
     </div>
   );
 }
