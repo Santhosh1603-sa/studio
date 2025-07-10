@@ -84,7 +84,7 @@ You must extract the following information:
 2.  **Summary**: Write a concise, neutral summary of the article's main points.
 3.  **Authors**: Identify the authors of the article. If not mentioned, return an empty array.
 4.  **Sentiment**: Analyze the overall sentiment. Provide a label ('Positive', 'Negative', 'Neutral') and a score from -1 to 1.
-5.  **Political View**: Analyze the political leaning. Provide a bias label ('Left-leaning', 'Center', 'Right-leaning', 'Unknown'), a confidence score, and a brief explanation for your determination, highlighting specific wording or framing if possible.
+5.  **Political View**: Analyze the political leaning. You must make a definitive choice between 'Left-leaning', 'Center', or 'Right-leaning' if at all possible. Only use 'Unknown' if the topic is completely apolitical (e.g., a recipe or sports results). For any choice, provide a confidence score and a brief explanation for your determination, highlighting specific wording, framing, or topic choices that informed your analysis.
 6.  **Topic Modeling**: Categorize the article into general topics. Provide topic labels and confidence scores.
 7.  **Timeline**: List key events chronologically with dates.
 8.  **Entities**: Extract key people, organizations, and locations.
