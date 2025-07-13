@@ -25,7 +25,7 @@ export default function RootLayout({
         </div>
         <footer className="py-4 mt-8 border-t">
             <div className="container mx-auto text-center text-sm text-muted-foreground">
-                <p>A capstone project by Santhosh for the course ITA0615 - Machine Learning.</p>
+                <p>A capstone project by Santhosh NR, Balaji K, Nithin Mani for the course ITA0615 - Machine Learning.</p>
             </div>
         </footer>
         <Toaster />
